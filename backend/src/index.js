@@ -1,5 +1,7 @@
 const express = require("express");
 const helmet = require("helmet");
+const bcrypt = require("bcrypt");
+const { User } = require("./db/models");
 
 const port = 4000;
 
@@ -13,9 +15,18 @@ app.get("/", (req, res) => {
 	res.send("Hello World!");
 });
 
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
 	const { name, email, password } = req.body;
-	res.send("Data received!");
+	const salt = bcrypt.genSaltSync(10);
+	const hash = bcrypt.hashSync(password, salt);
+
+	const newUser = await User.create({
+		name,
+		email,
+		password: hash,
+	});
+
+	res.send(`User ${name} has been created.`);
 });
 
 app.listen(port, () => {
