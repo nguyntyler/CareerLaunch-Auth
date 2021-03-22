@@ -20,13 +20,22 @@ app.post("/register", async (req, res) => {
 	const salt = bcrypt.genSaltSync(10);
 	const hash = bcrypt.hashSync(password, salt);
 
-	const newUser = await User.create({
-		name,
-		email,
-		password: hash,
+	const user = await User.findOne({
+		where: {
+			email,
+		},
 	});
 
-	res.send(`User ${name} has been created.`);
+	if (!user) {
+		const newUser = await User.create({
+			name,
+			email,
+			password: hash,
+		});
+		res.send(`User ${name} has been created.`);
+	} else {
+		res.send("User already exists.");
+	}
 });
 
 app.listen(port, () => {
